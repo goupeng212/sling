@@ -6,14 +6,16 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
 	goquery "github.com/google/go-querystring/query"
 )
 
 const (
-	contentType     = "Content-Type"
-	jsonContentType = "application/json"
-	formContentType = "application/x-www-form-urlencoded"
+	contentType      = "Content-Type"
+	jsonContentType  = "application/json"
+	textContentType  = "text/plain"
+	zipContentType   = "application/zip"
+	octetContentType = "application/octet-stream"
+	formContentType  = "application/x-www-form-urlencoded"
 )
 
 // Doer executes http requests.  It is implemented by *http.Client.  You can
@@ -352,9 +354,18 @@ func (s *Sling) Do(req *http.Request, successV, failureV interface{}) (*http.Res
 	// when err is nil, resp contains a non-nil resp.Body which must be closed
 	defer resp.Body.Close()
 	if successV != nil || failureV != nil {
-		err = decodeResponseJSON(resp, successV, failureV)
+		if resp.Header.Get(contentType) == jsonContentType {
+			err = decodeResponseJSON(resp, successV, failureV)
+		}
 	}
 	return resp, err
+}
+func (s *Sling) Dostrict(req *http.Request) (*http.Response, error) {
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
 
 // decodeResponse decodes response Body into the value pointed to by successV

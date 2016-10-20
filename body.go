@@ -3,10 +3,10 @@ package sling
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"strings"
-
 	goquery "github.com/google/go-querystring/query"
+	"io"
+//	"io/ioutil"
+	"strings"
 )
 
 // BodyProvider provides Body content for http.Request attachment.
@@ -27,6 +27,19 @@ func (p bodyProvider) ContentType() string {
 }
 
 func (p bodyProvider) Body() (io.Reader, error) {
+	return p.body, nil
+}
+
+//application/zip download
+type zipBodyProvider struct {
+	body io.Reader
+}
+
+func (p zipBodyProvider) ContentType() string {
+	return zipContentType
+}
+
+func (p zipBodyProvider) Body() (io.Reader, error) {
 	return p.body, nil
 }
 
